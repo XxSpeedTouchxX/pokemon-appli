@@ -1083,13 +1083,22 @@ ${code}
     // Mise à jour (2026-10-30, porteur : « le didacticiel n'est pas à jour sur l'appli ») : la nouvelle version est
     // cherchée à chaque ouverture et à chaque retour sur l'app ; dès qu'elle est installée, l'app se recharge une fois,
     // de préférence quand elle passe en arrière-plan (collection déjà enregistrée), sinon au prochain retour.
-    let swHad = !!navigator.serviceWorker.controller, swPending = false;
+    // 2026-11-28 (porteur : « je n'arrive toujours pas à voir les flèches, regarde bien si c'est à jour ») : la nouvelle
+    // version arrivait pendant l'ouverture mais ne s'appliquait qu'après un passage en arrière-plan. Désormais, tant que
+    // rien n'a été touché depuis l'ouverture ou le retour sur l'app, elle s'applique tout de suite (rechargement).
+    let swHad = !!navigator.serviceWorker.controller, swPending = false, swTouched = false;
     const swReload = () => { swPending = false; inst.saveFlush(); location.reload(); };
+    const swTouch = () => { swTouched = true; };
+    window.addEventListener('pointerdown', swTouch, { capture: true, passive: true });
+    window.addEventListener('keydown', swTouch, { capture: true, passive: true });
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (!swHad) { swHad = true; return; }
-      if (document.visibilityState === 'hidden') swReload(); else swPending = true;
+      if (document.visibilityState === 'hidden' || !swTouched) swReload(); else swPending = true;
     });
-    document.addEventListener('visibilitychange', () => { if (swPending && document.visibilityState === 'hidden') swReload(); });
+    document.addEventListener('visibilitychange', () => {
+      if (swPending && document.visibilityState === 'hidden') swReload();
+      else if (document.visibilityState === 'visible') swTouched = false;
+    });
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
     }).catch(() => {});

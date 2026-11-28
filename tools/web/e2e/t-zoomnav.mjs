@@ -2,6 +2,8 @@
 // carte de son classeur et rappuie dessus pour l'agrandir, une flèche à gauche et à droite de la carte pour faire
 // défiler ses cartes du classeur, en avant ou en arrière »). Ordre du classeur, position « 3 / N », flèche grisée à la
 // première et à la dernière carte, fiche derrière qui suit, produits scellés à part ; pas de flèches hors du classeur.
+// Glisser au doigt (2026-11-28, porteur : « la possibilité de slider en plus des flèches ») : gauche = suivante, droite =
+// précédente, petit geste ou geste vertical sans effet, résistance à la première carte.
 import { withFonts, withDemoCards, launch, BASE as E2E, shot } from './helpers.mjs';
 const BASE = E2E + '/?today=2026-10-04&debug';
 const SEC = 'section[aria-label="Mon classeur"]', PANEL = SEC + ' [role="tabpanel"]', TILE = PANEL + ' button[aria-label$="Ouvrir la fiche"]';
@@ -74,6 +76,44 @@ const anyId = await page.evaluate(() => window.__pkm.catalog().find(p => p.type 
 await page.evaluate(id => window.__pkm.fiOpen(id), anyId); await page.waitForTimeout(800);
 await page.locator(FI + ' button.pkm-fi-visual').click(); await page.waitForTimeout(400);
 ok('hors du classeur : carte agrandie sans flèches', (await page.locator(Z).count()) === 1 && (await page.locator(Z + ' button.pkm-zoom-nav').count()) === 0 && (await page.locator(Z + ' .pkm-zoom-pos').count()) === 0);
+// 8. Glisser au doigt (téléphone tactile).
+{
+  const tctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  await withFonts(tctx); await tctx.unroute(/openfreemap|tcgdex|pokemontcg/); await tctx.route(/openfreemap|pokemontcg/, r => r.abort()); await withDemoCards(tctx);
+  const tp = await tctx.newPage(); tp.on('pageerror', e => errors.push(e.message));
+  await tp.goto(BASE, { waitUntil: 'load' }); await tp.waitForTimeout(2500);
+  await tp.locator(SEC).scrollIntoViewIfNeeded();
+  await tp.locator(TILE).nth(1).tap(); await tp.waitForTimeout(900);
+  await tp.locator(FI + ' button.pkm-fi-visual').tap(); await tp.waitForTimeout(500);
+  const tpos = async () => (await tp.locator(Z + ' .pkm-zoom-pos').innerText()).trim();
+  const tname = async () => tp.locator(Z + ' img').getAttribute('alt');
+  // Geste simulé sur la carte : appui au centre, 6 mouvements, relâché.
+  const swipe = async (dx, dy = 0) => {
+    await tp.evaluate(([dx, dy]) => {
+      const el = document.querySelector('#pkm-zoom img'), b = el.getBoundingClientRect(), x0 = b.x + b.width / 2, y0 = b.y + b.height / 2;
+      const fire = (type, x, y) => { const t = new Touch({ identifier: 1, target: el, clientX: x, clientY: y }); el.dispatchEvent(new TouchEvent(type, { bubbles: true, cancelable: true, touches: type === 'touchend' ? [] : [t], changedTouches: [t] })); };
+      fire('touchstart', x0, y0);
+      for (let k = 1; k <= 6; k++) fire('touchmove', x0 + dx * k / 6, y0 + dy * k / 6);
+      fire('touchend', x0 + dx, y0 + dy);
+    }, [dx, dy]);
+    await tp.waitForTimeout(800);
+  };
+  ok('glisser : départ sur la 2ᵉ carte (' + await tpos() + ')', (await tpos()).startsWith('2 / ') && (await tname()) === names[1]);
+  await swipe(-140);
+  ok('glisser vers la gauche : carte suivante (' + await tname() + ', ' + await tpos() + ')', (await tname()) === names[2] && (await tpos()).startsWith('3 / '));
+  ok('après un glissement, la carte agrandie reste ouverte', (await tp.locator(Z).count()) === 1);
+  await swipe(140);
+  ok('glisser vers la droite : carte précédente (' + await tname() + ')', (await tname()) === names[1] && (await tpos()).startsWith('2 / '));
+  await swipe(-30);
+  ok('petit geste (30 px) : même carte, revenue au centre', (await tname()) === names[1] && (await tp.locator(Z + ' img').evaluate(i => i.style.transform || 'none')) === 'none');
+  await swipe(0, -160);
+  ok('geste vertical : même carte', (await tname()) === names[1]);
+  await swipe(140); await swipe(140);
+  ok('première carte : glisser vers la droite ne fait rien (' + await tpos() + ')', (await tname()) === names[0] && (await tpos()).startsWith('1 / ') && (await tp.locator(Z).count()) === 1);
+  ok('carte bien remise droite après la résistance', (await tp.locator(Z + ' img').evaluate(i => (i.style.transform || 'none') + '|' + (i.style.opacity || '1'))) === 'none|1');
+  await tctx.close();
+}
+
 ok('aucune erreur JS', errors.length === 0);
 if (errors.length) console.log(errors.join('\n'));
 console.log(res.join('\n'));

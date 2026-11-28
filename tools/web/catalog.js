@@ -636,7 +636,8 @@
       credit: (r.it.zoomCredit || '') + (r.it.zoomVersion ? ' · version ' + r.it.zoomVersion : ''), fallback: r.it.fallbackHi || '',
       close: () => this.setState({ zoom: null }),
       // Flèches de la carte agrandie : seulement depuis la fiche d'une carte du classeur (fiche.js, fiNavView).
-      hasNav: false, imgMax: '100%', pos: '', prev: null, next: null, prevOff: true, nextOff: true, prevDim: 1, nextDim: 1, prevLabel: '', nextLabel: ''
+      hasNav: false, imgMax: '100%', pos: '', prev: null, next: null, prevOff: true, nextOff: true, prevDim: 1, nextDim: 1, prevLabel: '', nextLabel: '',
+      touch: 'auto', tStart: null, tMove: null, tEnd: null
     };
     return r;
   };

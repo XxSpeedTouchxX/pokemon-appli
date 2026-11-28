@@ -37,7 +37,7 @@
   // chaque exemplaire gradé à sa place. Flèche grisée à la première et à la dernière carte ; la fiche derrière suit.
   fiProto.fiNavView = function (s) {
     const n = FI_NAV, cur = n && n.list[n.i];
-    if (!cur || cur.id !== s.fiId) return { hasNav: false, imgMax: '100%', pos: '', prevOff: true, nextOff: true, prevDim: 1, nextDim: 1, prevLabel: '', nextLabel: '', prev: null, next: null };
+    if (!cur || cur.id !== s.fiId) return { hasNav: false, imgMax: '100%', pos: '', prevOff: true, nextOff: true, prevDim: 1, nextDim: 1, prevLabel: '', nextLabel: '', prev: null, next: null, touch: 'auto', tStart: null, tMove: null, tEnd: null };
     const first = n.i === 0, last = n.i === n.list.length - 1, sealed = !!cur.sealed;
     const what = sealed ? 'produit' : 'carte';
     return {
@@ -45,8 +45,53 @@
       prevOff: first, nextOff: last, prevDim: first ? 0.3 : 1, nextDim: last ? 0.3 : 1,
       prevLabel: first ? 'Première ' + what + ' du classeur' : (sealed ? 'Produit précédent' : 'Carte précédente') + ' du classeur',
       nextLabel: last ? 'Dernière ' + what + ' du classeur' : (sealed ? 'Produit suivant' : 'Carte suivante') + ' du classeur',
-      prev: () => this.fiStep(-1), next: () => this.fiStep(1)
+      prev: () => this.fiStep(-1), next: () => this.fiStep(1),
+      // Glisser la carte au doigt (2026-11-28, porteur : « la possibilité de slider en plus des flèches ») : la carte suit
+      // le doigt ; vers la gauche, carte suivante, vers la droite, précédente ; au-delà de la première ou de la dernière,
+      // elle résiste puis revient. Un glissement ne ferme pas la carte agrandie (le « clic » qui le suit est ignoré).
+      touch: 'none', tStart: e => fiSwStart(e), tMove: e => fiSwMove(e), tEnd: () => fiSwEnd(this),
+      close: () => { if (Date.now() < FI_SW.until) return; this.setState({ fiZoom: false }); }
     };
+  };
+  const FI_SW = { on: false, x: 0, y: 0, dx: 0, lock: '', until: 0 };
+  const fiSwImg = () => document.querySelector('#pkm-zoom img');
+  const fiSwStart = e => {
+    const t = e.touches && e.touches[0];
+    if (!t || e.touches.length > 1 || !FI_NAV) { FI_SW.on = false; return; }
+    Object.assign(FI_SW, { on: true, x: t.clientX, y: t.clientY, dx: 0, lock: '' });
+  };
+  const fiSwMove = e => {
+    const t = e.touches && e.touches[0], n = FI_NAV;
+    if (!FI_SW.on || !t || !n) return;
+    const dx = t.clientX - FI_SW.x, dy = t.clientY - FI_SW.y;
+    if (!FI_SW.lock) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      FI_SW.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+    if (FI_SW.lock !== 'x') return;
+    const edge = (dx > 0 && n.i === 0) || (dx < 0 && n.i === n.list.length - 1);
+    FI_SW.dx = edge ? dx / 3 : dx;
+    const im = fiSwImg();
+    if (im) im.style.transform = 'translateX(' + FI_SW.dx + 'px) rotate(' + (FI_SW.dx / 45).toFixed(2) + 'deg)';
+  };
+  const fiSwEnd = inst => {
+    if (!FI_SW.on) return;
+    FI_SW.on = false;
+    if (FI_SW.lock !== 'x') return;
+    FI_SW.until = Date.now() + 450;
+    const n = FI_NAV, dx = FI_SW.dx, d = dx < 0 ? 1 : -1, im = fiSwImg();
+    const can = !!n && n.i + d >= 0 && n.i + d < n.list.length;
+    if (!im) return;
+    const from = im.style.transform || 'none';
+    if (can && Math.abs(dx) > 50) {
+      // La carte part du côté du glissement, la suivante arrive de l'autre (fiStep).
+      const out = im.animate ? im.animate([{ transform: from }, { transform: 'translateX(' + (-d * 220) + 'px) rotate(' + (-d * 6) + 'deg)', opacity: 0 }], { duration: 150, easing: 'ease-in', fill: 'forwards' }) : null;
+      const go = () => { im.style.opacity = '0'; if (out) out.cancel(); im.style.transform = ''; inst.fiStep(d); };
+      if (out) out.onfinish = go; else go();
+      return;
+    }
+    im.style.transform = '';
+    if (im.animate) im.animate([{ transform: from }, { transform: 'none' }], { duration: 220, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
   };
   fiProto.fiStep = function (d) {
     const n = FI_NAV, j = n ? n.i + d : -1;
@@ -54,12 +99,21 @@
     const t = n.list[j], from = this.st().fiFrom || 'binder';
     this.fiOpen(t.id, { gr: t.gr, from: from, nav: { list: n.list, i: j } });
     this.setState({ fiZoom: true });
-    // La nouvelle carte arrive du côté de la flèche touchée (sauf « mouvements réduits »).
+    // La nouvelle carte arrive du côté de la flèche touchée (sauf « mouvements réduits »), une fois son visuel prêt :
+    // l'ancienne disparaît tout de suite, jamais de mélange des deux pendant le chargement.
     requestAnimationFrame(() => {
       const im = document.querySelector('#pkm-zoom img');
-      let calm = false;
+      if (!im) return;
+      let calm = false, shown = false;
       try { calm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* sans effet */ }
-      if (im && im.animate && !calm) im.animate([{ transform: 'translateX(' + (d * 48) + 'px) scale(0.96)', opacity: 0.15 }, { transform: 'none', opacity: 1 }], { duration: 240, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+      im.style.opacity = '0'; im.style.transform = '';
+      const show = () => {
+        if (shown) return;
+        shown = true; im.style.opacity = '';
+        if (im.animate && !calm) im.animate([{ transform: 'translateX(' + (d * 48) + 'px) scale(0.96)', opacity: 0.15 }, { transform: 'none', opacity: 1 }], { duration: 240, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+      };
+      (im.decode ? im.decode() : Promise.resolve()).then(show, show);
+      setTimeout(show, 900);
     });
   };
 

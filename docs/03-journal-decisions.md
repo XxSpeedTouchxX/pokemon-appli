@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-28 (suite 2) — Carte agrandie : glisser au doigt ; mise à jour appliquée dès l'ouverture
+
+- **Demandes** : « je n'arrive toujours pas à voir les flèches, regarde bien si c'est bien à jour » ; « rajoute aussi la possibilité de slider, en plus des flèches, pour faire défiler en avant et en arrière ».
+- **Vérifié** : dropicards.fr servait bien la v312 (fichier `sw.js` du site relu sans cache), et les flèches s'affichent sur un iPhone simulé, depuis le classeur comme depuis « Tout afficher ». **Cause** : le téléphone télécharge la nouvelle version pendant que l'app est ouverte, mais ne l'appliquait qu'après un passage en arrière-plan (quitter l'app puis revenir).
+- **Fait** :
+  - **mise à jour appliquée tout de suite** tant que rien n'a été touché depuis l'ouverture ou le retour dans l'app (l'app se recharge seule) ; après un premier appui, elle attend toujours le passage en arrière-plan pour ne rien couper. Cette règle ne vaut qu'à partir de la v313 : le téléphone doit d'abord récupérer cette version une fois de l'ancienne façon ;
+  - **glisser au doigt** sur la carte agrandie : la carte suit le doigt en penchant un peu ; vers la gauche, carte suivante ; vers la droite, précédente ; un petit geste (moins de 50 px) ou un geste vertical la remet au centre ; à la première et à la dernière carte, elle résiste puis revient ; un glissement ne ferme pas la carte agrandie ;
+  - la carte suivante n'apparaît qu'une fois son visuel chargé : on ne voit plus l'ancienne glisser à sa place pendant le chargement.
+- `build.mjs` (mise à jour), `fiche.js` (`FI_SW`, `fiSwStart`, `fiSwMove`, `fiSwEnd`, visuel attendu dans `fiStep`), fragment `zoom` (gestes, `touch-action`), `catalog.js` ; test `t-zoomnav` (24). Caches v313 et v314.
+
 ## 2026-11-28 (suite 1) — Carte agrandie du classeur : flèches gauche et droite
 
 - **Demande** : « quand l'utilisateur appuie sur une carte de son classeur et rappuie dessus pour l'agrandir, je veux que dans l'interface de la carte agrandie tu rajoutes une flèche à gauche et à droite de la carte pour faire défiler ses cartes du classeur, en avant ou en arrière ».
