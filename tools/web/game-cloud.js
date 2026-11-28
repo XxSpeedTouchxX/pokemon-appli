@@ -49,6 +49,7 @@
       if (g.unlimited) { patch.pk = GC_INF; patch.pa = GC_INF; }
       if (g.buddy && (dexOwn(Object.assign({}, s, patch), g.buddy))) patch.buddy = g.buddy;
       this.setState(patch);
+      if (this.admGradeSync) this.admGradeSync(false, g.grade | 0); // grade du mode Admin suivi par le serveur (045)
       if (this.shopSync) this.shopSync(); // état du PK shop (018 ; sans 018 installé, rien ne change)
       return g;
     }, e => { gcSyncing = null; if (e && e.code !== 'network') console.warn('Dropicards : état du jeu indisponible', e.message); return null; });

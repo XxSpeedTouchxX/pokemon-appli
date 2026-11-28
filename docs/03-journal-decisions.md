@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-11-28 — Mode Admin : le grade choisi vaut aussi sur le serveur (pièce et Safari)
+
+- **Demande** : « je suis en mode admin en Grand maître Pokémon et je ne peux pas relancer la pièce ; il est marqué réservé au grade Collectionneur, et pareil pour le Safari ; fais en sorte qu'à partir du grade Collectionneur on ait le lancer de la pièce, pas que pour le grade Collectionneur ».
+- **Cause** : le grade choisi dans le panneau Admin (Mode Admin › Grade) ne changeait que l'app. Le serveur gardait le vrai grade du compte (PK gagnés au total, Pokédex) : il refusait la pièce et disait « Safari fermé », alors que l'app affichait Grand maître Pokémon.
+- **Règles (inchangées, déjà « à partir de ») :** chaque jeu reste ouvert au grade qui le débloque **et à tous ceux au-dessus** :
+  - pièce dès **Chasseur** (24 h, puis 12, 8, 6, 4 h) ;
+  - Safari éclair dès **Collectionneur** (24 h, puis 12, 6, 4 h).
+  Les boutons disent maintenant « 🔒 **Dès le** grade … » au lieu de « Au grade … », et la fenêtre « Accès verrouillé » précise que le jeu reste ouvert à tous les grades au-dessus.
+- **Fait** :
+  - l'app envoie au serveur le grade choisi en mode Admin : au choix d'un grade, à « Auto », à la sortie du mode Admin, et à la réouverture de l'app s'il ne suit pas ;
+  - le serveur s'en sert pour les jeux et le PK shop de **ce compte admin seulement**, tant que le mode Admin est ouvert (mot de passe des admins tapé depuis moins de 24 h) ;
+  - les autres joueurs voient toujours le **vrai grade** de l'admin (carte de dresseur, Ma ligue, recherche) ;
+  - chaque changement est noté dans le journal admin.
+  Le mode Admin garde la pièce et le Booster PK sans délai ; le Safari garde le délai du grade (décision du 2026-11-26), donc une partie toutes les 4 h en Grand maître.
+- **Garde-fou proposé (défaut)** : le grade choisi est ignoré dès que le mode Admin se referme (24 h après le mot de passe) ; il faut le rechoisir après avoir retapé le mot de passe (l'app le renvoie toute seule).
+- **À faire par le porteur** : coller `tools/supabase/install_043_a_045.sql` dans Studio (043, 044 et 045 d'un coup, rejouable ; remplace les collages séparés de 043 et 044), puis `000_verifier.sql` (043, 044, 045 « oui ») ; dans l'app, rouvrir le mode Admin et rechoisir le grade.
+- `tools/supabase/045_grade_admin.sql` (table `admin_grade`, `_game_grade` qui lit le grade choisi, `admin_force_grade`), tests `tests/test_045.sql` (46) ; `install_043_a_045.sql` et `install_024_a_034.sql` (refaits par `make_install_024.sh`), `000_verifier.sql` ; app `admin.js` (`admGradeSync`), `game-cloud.js`, textes `games.js`, `safari.js`, `points.js`, `pkshop.js` ; test `t-admgrade` (13). Cache v311.
+- **À confirmer** : la pièce reste ouverte dès Chasseur (règle validée le 2026-10-28) ; si tu veux qu'elle ne s'ouvre qu'à partir de Collectionneur, dis-le et je change la règle (app et serveur).
+
 ## 2026-11-27 (suite 14) — Languette soulevée dès le départ de l'ouverture
 
 - **Demande** : « fais soulever la languette encore 0,3 s plus tôt ».

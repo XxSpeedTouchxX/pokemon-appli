@@ -86,7 +86,7 @@ await page.evaluate(() => localStorage.setItem('pkm-grade-force', '1'));
 await page.goto(E2E + '/?debug&today=2026-11-23', { waitUntil: 'load' }); await page.waitForTimeout(1300);
 await page.evaluate(() => { window.__pkm.setState({ gradeUp: null }); window.__pkm.ptsOpen('pk'); }); await page.waitForTimeout(600);
 const lockRows = await page.locator('.pkm-pts-today .pkm-pts-lock').evaluateAll(rs => rs.map(r => r.innerText.replace(/\s+/g, ' ').trim()));
-ok('Recrue : pièce « Au grade Chasseur », Safari « Au grade Collectionneur » (' + lockRows.join(' | ') + ')', lockRows.length === 2 && /Pile ou face Au grade Chasseur/.test(lockRows[0]) && /Safari éclair Au grade Collectionneur/.test(lockRows[1]));
+ok('Recrue : pièce « Dès le grade Chasseur », Safari « Dès le grade Collectionneur » (' + lockRows.join(' | ') + ')', lockRows.length === 2 && /Pile ou face Dès le grade Chasseur/.test(lockRows[0]) && /Safari éclair Dès le grade Collectionneur/.test(lockRows[1]));
 const pkTxt = N(await page.locator('section[aria-label="Mes PK"]').innerText());
 ok('Recrue : panneau PK, pièce et Safari « Se débloque au grade … »', /Se débloque au grade Chasseur/.test(pkTxt) && /Se débloque au grade Collectionneur/.test(pkTxt) && /(Encore .* pour le grade|Prochain grade :) Chasseur/.test(pkTxt));
 await page.locator('.pkm-pts-today .pkm-pts-lock').last().locator('button').click(); await page.waitForTimeout(900);

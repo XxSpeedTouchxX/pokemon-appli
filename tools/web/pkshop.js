@@ -152,8 +152,8 @@
     if (lk.kind === 'hist') return store ? 'L’historique du prix n’est pas encore disponible dans cette version.'
       : 'L’historique du prix est réservé au DropiPass : l’évolution de la cote sur 1 semaine, 1 mois et depuis le début.';
     if (lk.kind === 'radar') return 'Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « ' + g + ' ».';
-    if (lk.kind === 'safari') return 'Tu ne peux pas jouer au Safari éclair tant que tu n’as pas atteint le grade « ' + g + ' ».';
-    if (lk.kind === 'coin') return 'Tu ne peux pas lancer la pièce tant que tu n’as pas atteint le grade « ' + g + ' ».';
+    if (lk.kind === 'safari') return 'Tu ne peux pas jouer au Safari éclair tant que tu n’as pas atteint le grade « ' + g + ' ». Il reste ensuite ouvert à tous les grades au-dessus.';
+    if (lk.kind === 'coin') return 'Tu ne peux pas lancer la pièce tant que tu n’as pas atteint le grade « ' + g + ' ». Elle reste ensuite ouverte à tous les grades au-dessus.';
     if (lk.kind === 'binder') return 'Ton classeur est plein : ' + lk.lim + ' ' + lk.what + ' au maximum au grade ' + shopGradeName(lk.cur) + '. Tu dois d’abord déverrouiller le grade ' + g + ' pour en ajouter plus.';
     return 'Tu dois d’abord déverrouiller le grade ' + g + ' pour avoir accès à ' + (lk.kind === 'ticket' ? 'cette loterie.' : 'cet item.');
   };

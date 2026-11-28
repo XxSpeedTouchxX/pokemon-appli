@@ -135,9 +135,9 @@
         flipping: busyC, still: !busyC, faceClass: busyC ? 'pkm-gm-flip' : '', angle: g.cPhase === 'flip' || g.cPhase === 'done' ? (turns * 180) + 'deg' : '0deg',
         resultDone: g.cPhase === 'done', resultText: g.cWin ? 'Gemme PK : +' + GM_COIN_WIN * (g.cMul || 1) + ' PK !' + ((g.cMul || 1) > 1 ? ' (2XP PK)' : '') : 'Cristal éteint : pas de PK cette fois.',
         resultColor: g.cWin ? 'var(--pkm-accent)' : '#9AA8C3', ready: coinOpen && cw === 0 && !busyC, locked: !coinOpen, op: coinOpen ? '1' : '0.55',
-        every: coinOpen ? '1 lancer toutes les ' + P.coinH + ' h' : 'Au grade ' + this.perkGrade('coinH'),
+        every: coinOpen ? '1 lancer toutes les ' + P.coinH + ' h' : 'Dès le grade ' + this.perkGrade('coinH'),
         lockText: 'Le jeu de la pièce se débloque au grade ' + this.perkGrade('coinH') + ' (1 500 PK gagnés).',
-        button: !coinOpen ? '🔒 Au grade ' + this.perkGrade('coinH') : busyC ? 'La pièce tourne…' : cw > 0 ? 'Tu dois attendre ' + gmLeft(cw) + ' pour rejouer' : 'Lancer la pièce',
+        button: !coinOpen ? '🔒 Dès le grade ' + this.perkGrade('coinH') : busyC ? 'La pièce tourne…' : cw > 0 ? 'Tu dois attendre ' + gmLeft(cw) + ' pour rejouer' : 'Lancer la pièce',
         btnCls: 'pkm-gm-go' + (coinOpen && cw > 0 && !busyC ? ' pkm-gm-go-no' + (s.gmNoWhich === 'c' ? ' pkm-gm-go-shake' : '') : '') + (!coinOpen ? ' pkm-gm-go-lock' : ''), noIco: coinOpen && cw > 0 && !busyC,
         flip: () => { if (!coinOpen) { this.gameLockOpen('coin', 'coinH'); return; } if (cw > 0 && !busyC) { this.gmNo('c'); return; } this.gmFlip(); }, key: 'coin-' + (g.cN || 0)
       },

@@ -21,7 +21,7 @@ const PAID = Array.from({ length: 151 }, (_, i) => i + 1).filter(n => [1, 4, 7, 
 // 1. Recrue (premier lancement)
 await go('start=market'); await seed({ tuto: 'done', onb: 0 }); await go('start=market');
 const coin = await text('section[aria-label="Pile ou face"]');
-ok('Recrue : pièce fermée (« ' + coin.slice(-110) + ' »)', /Au grade Chasseur/.test(coin) && /se débloque au grade Chasseur/.test(coin));
+ok('Recrue : pièce fermée (« ' + coin.slice(-110) + ' »)', /Dès le grade Chasseur/.test(coin) && /se débloque au grade Chasseur/.test(coin));
 ok('Recrue : un booster toutes les 24 h', /1 offert toutes les 24 h/.test(await text('section[aria-label="Booster PK"]')));
 await page.screenshot({ path: shot('grades-recrue-jeux.png'), fullPage: true });
 const toShop = async () => { await go('start=market'); await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700); };

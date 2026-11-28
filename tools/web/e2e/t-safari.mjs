@@ -301,7 +301,7 @@ for (const role of ['user', 'admin']) {
     await p4.evaluate(() => window.__pkm.setState({ gradeUp: null }));
     const sc = p4.locator('section[aria-label="Safari éclair"]'); await sc.scrollIntoViewIfNeeded();
     const t = N(await sc.innerText());
-    res4.push(g + ':' + (want === 'lock' ? (/🔒 Au grade Collectionneur/.test(t) && /se débloque au grade Collectionneur/.test(t)) : new RegExp('toutes les ' + want + ' h').test(t) && /GO/.test(t)));
+    res4.push(g + ':' + (want === 'lock' ? (/🔒 Dès le grade Collectionneur/.test(t) && /se débloque au grade Collectionneur/.test(t)) : new RegExp('toutes les ' + want + ' h').test(t) && /GO/.test(t)));
     if (want === 'lock') {
       await sc.locator('button.pkm-gm-go').click(); await p4.waitForTimeout(400);
       res4.push('fermé:' + ((await p4.locator('.pkm-sf').count()) === 0));

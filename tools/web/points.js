@@ -50,12 +50,12 @@
     const bw = gmWait(g.boosterAt, gmBoosterMs(self)), xp = ptsXpPk(self), x2 = v => ptsNum(v * (xp ? 2 : 1));
     row({ key: 'booster', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Booster PK', sub: bw ? 'Prêt dans ' + gmLeft(bw) : x2(30) + ' à ' + x2(500) + ' PK à gagner' + (xp ? ' · 2XP' : ''), state: bw ? 'wait' : 'ready', cta: bw ? 'Voir' : 'Ouvrir',
       aria: 'Booster PK : ' + (bw ? 'prêt dans ' + gmLeft(bw) : 'prêt, 30 à 500 PK'), go: () => self.ptsGames('Booster PK') });
-    if (!P.coinH) row({ key: 'coin', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Pile ou face', sub: 'Au grade ' + self.perkGrade('coinH'), state: 'lock', cta: 'Voir',
+    if (!P.coinH) row({ key: 'coin', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Pile ou face', sub: 'Dès le grade ' + self.perkGrade('coinH'), state: 'lock', cta: 'Voir',
       aria: 'Pile ou face : au grade ' + self.perkGrade('coinH'), go: () => self.ptsGo(() => self.push('grade', { gradeIx: PF_GRADES.findIndex(x => x.coinH) })) });
     else { const cw = gmWait(g.coinAt, gmCoinMs(self)); row({ key: 'coin', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Pile ou face', sub: cw ? 'Prête dans ' + gmLeft(cw) : '0 ou ' + x2(GM_COIN_WIN) + ' PK, une chance sur deux' + (xp ? ' · 2XP' : ''), state: cw ? 'wait' : 'ready', cta: cw ? 'Voir' : 'Lancer',
       aria: 'Pile ou face : ' + (cw ? 'prête dans ' + gmLeft(cw) : 'prête'), go: () => self.ptsGames('Pile ou face') }); }
     if (typeof self.sfLocked === 'function') {
-      if (self.sfLocked()) row({ key: 'safari', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Safari éclair', sub: 'Au grade ' + (self.perkGrade('safariH') || 'Collectionneur'), state: 'lock', cta: 'Voir',
+      if (self.sfLocked()) row({ key: 'safari', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Safari éclair', sub: 'Dès le grade ' + (self.perkGrade('safariH') || 'Collectionneur'), state: 'lock', cta: 'Voir',
         aria: 'Safari éclair : au grade ' + (self.perkGrade('safariH') || 'Collectionneur'), go: () => self.ptsGo(() => self.push('grade', { gradeIx: PF_GRADES.findIndex(x => x.safariH) })) });
       else { const sw = self.sfWaitMs(); row({ key: 'safari', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Safari éclair', sub: sw ? 'Prêt dans ' + gmLeft(sw) : 'Jusqu’à ' + x2(36) + ' PK en Facile' + (xp ? ' · 2XP' : ''), state: sw ? 'wait' : 'ready', cta: sw ? 'Voir' : 'Jouer',
         aria: 'Safari éclair : ' + (sw ? 'prêt dans ' + gmLeft(sw) : 'prêt'), go: () => self.ptsGames('Safari éclair') }); }

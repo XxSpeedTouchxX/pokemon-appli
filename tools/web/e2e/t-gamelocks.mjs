@@ -30,8 +30,8 @@ for (const [label, extra] of [['joueur', null], ['admin, mode Admin (PK illimit�
     const shown = await page.evaluate(() => window.__pkm.tierOf().cur.name);
     const b = await card('Booster PK'), c = await card('Pile ou face'), s = await card('Safari éclair');
     const bOk = new RegExp('toutes les ' + BOOSTER[g] + ' h').test(b) && /Ouvrir mon booster/.test(b);
-    const cOk = COIN[g] ? new RegExp('toutes les ' + COIN[g] + ' h').test(c) && /Lancer la pièce/.test(c) : /🔒 Au grade Chasseur/.test(c);
-    const sOk = SAFARI[g] ? new RegExp('toutes les ' + SAFARI[g] + ' h').test(s) && !/Sans délai/.test(s) && /GO/.test(s) : /🔒 Au grade Collectionneur/.test(s);
+    const cOk = COIN[g] ? new RegExp('toutes les ' + COIN[g] + ' h').test(c) && /Lancer la pièce/.test(c) : /🔒 Dès le grade Chasseur/.test(c);
+    const sOk = SAFARI[g] ? new RegExp('toutes les ' + SAFARI[g] + ' h').test(s) && !/Sans délai/.test(s) && /GO/.test(s) : /🔒 Dès le grade Collectionneur/.test(s);
     // Un jeu fermé ne s'ouvre pas : la fenêtre « Accès verrouillé » s'affiche à la place.
     let tapOk = true;
     if (!SAFARI[g]) {
@@ -50,11 +50,11 @@ for (const [label, extra] of [['joueur', null], ['admin, mode Admin (PK illimit�
 // Le cas du porteur : grade Chasseur, compte admin « sans délai » → Safari fermé, fenêtre « Accès verrouillé ».
 await atGrade(1, { sfHours: 24, cloudGame: { unlimited: true } });
 const s1 = await card('Safari éclair');
-ok('Chasseur admin, serveur qui répond « 24 h » (ancien 027) : Safari toujours fermé', /🔒 Au grade Collectionneur/.test(s1) && await page.evaluate(() => window.__pkm.sfLocked()));
+ok('Chasseur admin, serveur qui répond « 24 h » (ancien 027) : Safari toujours fermé', /🔒 Dès le grade Collectionneur/.test(s1) && await page.evaluate(() => window.__pkm.sfLocked()));
 await page.locator('main section[aria-label="Safari éclair"]').screenshot({ path: shot('gamelocks-chasseur.png') });
 // Grade de l'app Collectionneur, mais le serveur répond « fermé » (son grade est plus bas) : fermé aussi.
 await atGrade(2, { sfHours: 0 });
-ok('Collectionneur dans l’app, serveur « fermé » : Safari fermé', /🔒 Au grade Collectionneur/.test(await card('Safari éclair')));
+ok('Collectionneur dans l’app, serveur « fermé » : Safari fermé', /🔒 Dès le grade Collectionneur/.test(await card('Safari éclair')));
 // Collectionneur admin en mode Admin (2026-11-26, porteur : « je suis Collectionneur et j'ai joué autant de fois que je
 // voulais ») : partie jouée à l'instant → attente de 24 h, comme un joueur ordinaire.
 await atGrade(2, { cloudGame: { unlimited: true }, games: { safariAt: new Date().toISOString() } });

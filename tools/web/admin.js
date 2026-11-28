@@ -43,6 +43,26 @@
     const a = Object.assign(admOf(this.st()), patch);
     admApply(a);
     this.setState(Object.assign({ admin: a }, extra || {}));
+    if (patch && ('tier' in patch || 'on' in patch)) this.admGradeSync(true);
+  };
+  // Grade choisi aussi sur le serveur (045, 2026-11-28, porteur : « en mode admin en Grand maître Pokémon, je ne peux
+  // pas relancer la pièce ; c'est marqué réservé au grade Collectionneur, pareil pour le Safari »). Sans lui, le serveur
+  // gardait le vrai grade du compte et refusait la pièce et le Safari. Envoyé au choix d'un grade, à « Auto », à la
+  // sortie du mode Admin, et à chaque relecture de l'état du serveur (game-cloud.js) quand il ne suit pas le choix.
+  let admGradeSent = null;
+  proto.admGradeSync = function (force, srv) {
+    if (!Cloud.on() || !Cloud.signedIn() || !Cloud.isAdmin()) return;
+    const a = admOf(this.st()), want = a.on && a.tier >= 0 ? a.tier : -1;
+    if (!force && (want < 0 || srv === want || admGradeSent === want)) return;
+    admGradeSent = want;
+    Cloud.rpc('admin_force_grade', { g: want >= 0 ? want : null }).then(() => {
+      if (this.gcSync) this.gcSync();
+      if (this.sfSync) this.sfSync(true);
+    }, e => {
+      if (want < 0 || !e) return;
+      this.setState({ toast: e.code === 'not_installed' ? 'Grade choisi dans l’app seulement : installe install_043_a_045.sql dans Studio pour la pièce et le Safari' : (e.message || 'Grade non envoyé au serveur') });
+      this.flash();
+    });
   };
   proto.adminInit = function () { admApply(admOf(this.st())); };
 

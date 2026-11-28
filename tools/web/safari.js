@@ -345,10 +345,10 @@
     const w = this.sfWaitMs(), busy = !!s.sfOpen, h = this.sfHours(), locked = this.sfLocked(), adminTry = !!s.sfOff && sfCloud() && Cloud.isAdmin();
     const grade = this.perkGrade('safariH') || 'Collectionneur';
     r.sf = {
-      every: locked ? 'Au grade ' + grade : '1 partie toutes les ' + h + ' h', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
+      every: locked ? 'Dès le grade ' + grade : '1 partie toutes les ' + h + ' h', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
       lockText: 'Le Safari éclair se débloque au grade ' + grade + ' (7 500 PK gagnés et 30 compagnons).',
       // « GO » (2026-11-13, porteur) : à la place de « Jouer au safari » et de « Essayer (aperçu admin) ».
-      button: locked ? '🔒 Au grade ' + grade : s.sfOff && !adminTry ? 'Bientôt disponible' : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'GO',
+      button: locked ? '🔒 Dès le grade ' + grade : s.sfOff && !adminTry ? 'Bientôt disponible' : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'GO',
       btnCls: 'pkm-gm-go' + (w > 0 && !busy && !locked ? ' pkm-gm-go-no' + (s.gmNoWhich === 's' ? ' pkm-gm-go-shake' : '') : '') + ((s.sfOff && !adminTry) || locked ? ' pkm-gm-go-lock' : '') + (!locked && !(s.sfOff && !adminTry) && !busy && w === 0 ? ' pkm-sf-gobtn' : ''), noIco: w > 0 && !busy && !locked,
       play: () => {
         if (locked) { this.gameLockOpen('safari', 'safariH'); return; }
