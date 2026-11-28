@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T15:32:28Z",
+ "updated": "2026-11-28T00:13:06Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,20 @@
   }
  ],
  "items": [
+  {
+   "title": "Pokémon GO : Paradis tropical !",
+   "url": "https://www.pokebip.com/news/7661/pokemon-go-paradis-tropical",
+   "date": "2026-11-27T20:50:02Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Célébration pour Pokémon Champions !",
+   "url": "https://www.pokebip.com/news/7660/pokemon-go-celebration-pour-pokemon-champions",
+   "date": "2026-11-27T20:50:01Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "Pokémon GO : Journée Combat Max : Lézargus Gigamax !",
    "url": "https://www.pokebip.com/news/7647/pokemon-go-journee-combat-max-lezargus-gigamax",
@@ -75,20 +89,6 @@
    "tcg": false
   },
   {
-   "title": "Pokémon GO : Paradis tropical !",
-   "url": "https://www.pokebip.com/news/7661/pokemon-go-paradis-tropical",
-   "date": "2026-11-26T08:09:04Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Célébration pour Pokémon Champions !",
-   "url": "https://www.pokebip.com/news/7660/pokemon-go-celebration-pour-pokemon-champions",
-   "date": "2026-11-26T08:07:47Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
    "title": "Pokémon Champions : Règlement M-D des combats classés !",
    "url": "https://www.pokebip.com/news/7658/pokemon-champions-reglement-m-d-des-combats-classes",
    "date": "2026-11-25T05:49:40Z",
@@ -117,7 +117,7 @@
    "tcg": false
   },
   {
-   "title": "Pokémon GO : Journée de Raids clones",
+   "title": "Pokémon GO : Journée de Raids clones !",
    "url": "https://www.pokebip.com/news/7649/pokemon-go-journee-de-raids-clones",
    "date": "2026-11-20T16:16:44Z",
    "source": "Pokébip",
